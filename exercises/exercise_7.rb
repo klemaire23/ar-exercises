@@ -29,4 +29,38 @@ require_relative './exercise_6'
 puts "Exercise 7"
 puts "----------"
 
+class Employee < ActiveRecord::Base
+  validates :first_name, :last_name, :hourly_rate, :store_id, presence: true
+  validates :hourly_rate, numericality: { greater_than_or_equal_to: 40, less_than_or_equal_to: 200 }
+end
+
+employee = Employee.new(first_name: "", last_name: "", hourly_rate: 300)
+employee.valid? # This triggers the validations
+puts employee.errors.full_messages
+
+class Store < ActiveRecord::Base
+  validates :name, presence: true, length: { minimum: 3 }
+  validates :annual_revenue, numericality: { greater_than_or_equal_to: 0 }
+  validate :must_carry_apparel
+
+  def must_carry_apparel
+    unless mens_apparel || womens_apparel
+      errors.add(:base, "Store must carry at least one of men's or women's apparel")
+    end
+  end
+end
+
+puts "Enter a store name:"
+store_name = gets.chomp
+
+store = Store.create(name: store_name)
+
+if store.errors.any?
+  puts "Errors:"
+  store.errors.full_messages.each do |message|
+    puts message
+  end
+else
+  puts "Store created successfully!"
+end
 
